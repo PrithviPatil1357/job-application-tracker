@@ -3,6 +3,10 @@
  */
 export interface JobPosting {
   /**
+   * The id of the job.
+   */
+  id: string;
+  /**
    * The title of the job.
    */
   title: string;
@@ -11,6 +15,10 @@ export interface JobPosting {
    */
   company: string;
   /**
+   * The position of the job.
+   */
+  position: string;
+  /**
    * The URL of the job posting.
    */
   url: string;
@@ -18,6 +26,11 @@ export interface JobPosting {
    * The job description.
    */
   description: string;
+
+  /**
+   * The date the application was submitted.
+   */
+  applicationDate?: Date | null;
 }
 
 /**
@@ -35,8 +48,11 @@ export async function getJobPostings(
 
   return [
     {
+      id: '1',
       title: 'Software Engineer',
       company: 'Google',
+      position: 'Frontend Developer',
+      applicationDate: new Date(),
       url: 'https://example.com/jobs/123',
       description: 'Example job description.',
     },
