@@ -24,7 +24,6 @@ import {
 import AddApplicationForm from "@/components/AddApplicationForm";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Toaster } from "@/components/ui/toaster";
 
 // Extend the JobPosting interface to include new properties
 
@@ -83,8 +82,8 @@ const mockApplications: Application[] = [
 const ApplicationList = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [open, setOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication]
-    = useState<Application | null>(null);
+  const [selectedApplication, setSelectedApplication
+    ] = useState<Application | null>(null);
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<Status | null>(null);
 
@@ -93,7 +92,12 @@ const ApplicationList = () => {
     const fetchApplications = async () => {
       // Simulate loading
       setTimeout(() => {
-        setApplications(mockApplications);
+        // Convert mock dates to ISO strings for proper hydration
+        const hydratedApplications = mockApplications.map(app => ({
+          ...app,
+          applicationDate: app.applicationDate ? app.applicationDate : null,
+        }));
+        setApplications(hydratedApplications);
       }, 500);
     };
 
@@ -250,7 +254,6 @@ const ApplicationList = () => {
           />
         </DialogContent>
       </Dialog>
-      <Toaster />
     </>
   );
 };
