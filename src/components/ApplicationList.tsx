@@ -20,19 +20,26 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import AddApplicationForm from "@/components/AddApplicationForm";
 import { useToast } from "@/hooks/use-toast";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 // Extend the JobPosting interface to include new properties
 
 export enum Status {
-    APPLIED = "Applied",
-    PHONE_SCREEN = "Phone Screen",
-    INTERVIEW = "Interview",
-    OFFER = "Offer",
-    REJECTED = "Rejected",
+  APPLIED = "Applied",
+  PHONE_SCREEN = "Phone Screen",
+  INTERVIEW = "Interview",
+  OFFER = "Offer",
+  REJECTED = "Rejected",
 }
 
 // Extend the JobPosting interface to include new properties
@@ -73,7 +80,7 @@ const mockApplications: Application[] = [
     status: Status.INTERVIEW,
     roundsCompleted: 2,
     notes: "Second round done",
-     jobDescription: "Example job description.",
+    jobDescription: "Example job description.",
     hrContact: "HR Contact",
     source: "LinkedIn",
   },
@@ -82,8 +89,8 @@ const mockApplications: Application[] = [
 const ApplicationList = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [open, setOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication
-    ] = useState<Application | null>(null);
+  const [selectedApplication, setSelectedApplication] =
+    useState<Application | null>(null);
   const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState<Status | null>(null);
 
@@ -93,7 +100,7 @@ const ApplicationList = () => {
       // Simulate loading
       setTimeout(() => {
         // Convert mock dates to ISO strings for proper hydration
-        const hydratedApplications = mockApplications.map(app => ({
+        const hydratedApplications = mockApplications.map((app) => ({
           ...app,
           applicationDate: app.applicationDate ? app.applicationDate : null,
         }));
@@ -130,7 +137,7 @@ const ApplicationList = () => {
     );
     setApplications(updatedApplications as Application[]);
     setSelectedApplication(null); // Close the dialog after updating
-    setOpen(false)
+    setOpen(false);
     toast({
       title: "Success",
       description: "Job application updated successfully.",
@@ -153,20 +160,24 @@ const ApplicationList = () => {
   };
 
   const handleDialogClose = () => {
-        setOpen(false);
-        setSelectedApplication(null); // Clear selected application when closing
-    };
+    setOpen(false);
+    setSelectedApplication(null); // Clear selected application when closing
+  };
 
   return (
     <>
       {/* Status Filter */}
       <div className="mb-4 flex justify-end">
-        <Select onValueChange={(value) => setStatusFilter(value as Status)} defaultValue={statusFilter || ""}>
+        <Select
+          onValueChange={(value) =>
+            setStatusFilter((value as Status) || undefined)
+          }
+          defaultValue={statusFilter || undefined}
+        >
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Statuses</SelectItem>
             {Object.values(Status).map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
@@ -183,13 +194,13 @@ const ApplicationList = () => {
             <TableHead className="w-[100px]">Title</TableHead>
             <TableHead>Company</TableHead>
             <TableHead>Position</TableHead>
-             <TableHead>Source</TableHead>
+            <TableHead>Source</TableHead>
             <TableHead>Date Applied</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Rounds Completed</TableHead>
             <TableHead>Notes</TableHead>
-             <TableHead>HR Contact</TableHead>
-              <TableHead>Job Description</TableHead>
+            <TableHead>HR Contact</TableHead>
+            <TableHead>Job Description</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -208,8 +219,8 @@ const ApplicationList = () => {
               <TableCell>{application.status}</TableCell>
               <TableCell>{application.roundsCompleted}</TableCell>
               <TableCell>{application.notes}</TableCell>
-                <TableCell>{application.hrContact}</TableCell>
-                 <TableCell>{application.jobDescription}</TableCell>
+              <TableCell>{application.hrContact}</TableCell>
+              <TableCell>{application.jobDescription}</TableCell>
               <TableCell className="flex justify-center gap-4">
                 <Button
                   variant="ghost"
@@ -232,10 +243,12 @@ const ApplicationList = () => {
       </Table>
 
       <Dialog open={open} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[425px] h-[90vh] flex flex-col p-0">
+          <DialogHeader className="p-6 pb-4 border-b">
             <DialogTitle>
-              {selectedApplication ? "Edit Job Application" : "Add Job Application"}
+              {selectedApplication
+                ? "Edit Job Application"
+                : "Add Job Application"}
             </DialogTitle>
             <DialogDescription>
               {selectedApplication
@@ -243,15 +256,27 @@ const ApplicationList = () => {
                 : "Fill in the details to track your job application."}
             </DialogDescription>
           </DialogHeader>
-          <AddApplicationForm
-            setOpen={setOpen}
-            onSubmit={
-              selectedApplication
-                ? (values) => handleUpdateApplication(selectedApplication.id, values)
-                : (values) => handleAddApplication(values)
-            }
-            initialValues={selectedApplication}
-          />
+          <div className="flex-1 overflow-y-auto p-6">
+            <AddApplicationForm
+              setOpen={setOpen}
+              onSubmit={
+                selectedApplication
+                  ? (values) =>
+                      handleUpdateApplication(selectedApplication.id, values)
+                  : (values) => handleAddApplication(values)
+              }
+              initialValues={selectedApplication}
+            />
+          </div>
+          <DialogFooter className="p-6 pt-4 border-t">
+            <Button
+              type="submit"
+              form="add-application-form"
+              className="w-full"
+            >
+              {selectedApplication ? "Update Application" : "Add Application"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
