@@ -24,9 +24,26 @@ import {
 } from "@/components/ui/dialog";
 import AddApplicationForm from "@/components/AddApplicationForm";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+// Define possible status options
+const statusOptions = [
+  "Applied",
+  "Phone Screen",
+  "Interview",
+  "Offer",
+  "Rejected",
+];
+
+// Extend the JobPosting interface to include new properties
+export interface Application extends JobPosting {
+  status: string;
+  roundsCompleted: number;
+  notes: string;
+}
 
 // Dummy data for demonstration
-const mockApplications: JobPosting[] = [
+const mockApplications: Application[] = [
   {
     id: "1",
     title: "Software Engineer",
@@ -35,6 +52,9 @@ const mockApplications: JobPosting[] = [
     applicationDate: new Date(),
     url: "https://example.com/jobs/123",
     description: "Example job description.",
+    status: "Applied",
+    roundsCompleted: 1,
+    notes: "First round done",
   },
   {
     id: "2",
@@ -44,27 +64,23 @@ const mockApplications: JobPosting[] = [
     applicationDate: new Date(),
     url: "https://example.com/jobs/456",
     description: "Another job description.",
+    status: "Interview",
+    roundsCompleted: 2,
+    notes: "Second round done",
   },
 ];
 
 const ApplicationList = () => {
-  const [applications, setApplications] = useState<JobPosting[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] =
-    useState<JobPosting | null>(null);
-    const { toast } = useToast();
+    useState<Application | null>(null);
+  const { toast } = useToast();
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   useEffect(() => {
     // Simulate fetching applications from a service or database
-    // In a real app, you would replace this with an actual data fetch
     const fetchApplications = async () => {
-      // Replace 'yourJobBoard' and 'yourSearchTerm' with actual values
-      // const fetchedApplications = await getJobPostings(
-      //   "yourJobBoard",
-      //   "yourSearchTerm"
-      // );
-      // setApplications(fetchedApplications);
-
       // Simulate loading
       setTimeout(() => {
         setApplications(mockApplications);
@@ -74,42 +90,64 @@ const ApplicationList = () => {
     fetchApplications();
   }, []);
 
-  const handleAddApplication = (newApplication: Omit<JobPosting, "id">) => {
+  // Filter applications based on selected status
+  const filteredApplications = statusFilter
+    ? applications.filter((app) => app.status === statusFilter)
+    : applications;
+
+  const handleAddApplication = (newApplication: Omit<Application, "id">) => {
     // Simulate adding an application to a service or database
     const newId = String(applications.length + 1);
     const applicationToAdd = { ...newApplication, id: newId };
-    setApplications([...applications, applicationToAdd as JobPosting]);
+    setApplications([...applications, applicationToAdd as Application]);
   };
 
   const handleUpdateApplication = (
     id: string,
-    updatedApplication: Omit<JobPosting, "id">
+    updatedApplication: Omit<Application, "id">
   ) => {
     // Simulate updating an application in a service or database
     const updatedApplications = applications.map((app) =>
       app.id === id ? { ...updatedApplication, id } : app
     );
-    setApplications(updatedApplications as JobPosting[]);
+    setApplications(updatedApplications as Application[]);
     setSelectedApplication(null); // Close the dialog after updating
   };
 
   const handleDeleteApplication = (id: string) => {
     // Simulate deleting an application from a service or database
     const updatedApplications = applications.filter((app) => app.id !== id);
-    setApplications(updatedApplications as JobPosting[]);
+    setApplications(updatedApplications as Application[]);
     toast({
       title: "Success",
       description: "Job application deleted successfully.",
     });
   };
 
-  const handleEdit = (application: JobPosting) => {
+  const handleEdit = (application: Application) => {
     setSelectedApplication(application);
     setOpen(true);
   };
 
   return (
     <>
+      {/* Status Filter */}
+      <div className="mb-4 flex justify-end">
+        <Select onValueChange={setStatusFilter} defaultValue={statusFilter || ""}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">All Statuses</SelectItem>
+            {statusOptions.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <Table>
         <TableCaption>A list of your job applications.</TableCaption>
         <TableHeader>
@@ -118,11 +156,14 @@ const ApplicationList = () => {
             <TableHead>Company</TableHead>
             <TableHead>Position</TableHead>
             <TableHead>Date Applied</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Rounds Completed</TableHead>
+            <TableHead>Notes</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {applications.map((application) => (
+          {filteredApplications.map((application) => (
             <TableRow key={application.id}>
               <TableCell className="font-medium">{application.title}</TableCell>
               <TableCell>{application.company}</TableCell>
@@ -132,6 +173,9 @@ const ApplicationList = () => {
                   ? format(application.applicationDate, "yyyy-MM-dd")
                   : "N/A"}
               </TableCell>
+              <TableCell>{application.status}</TableCell>
+              <TableCell>{application.roundsCompleted}</TableCell>
+              <TableCell>{application.notes}</TableCell>
               <TableCell className="flex justify-center gap-4">
                 <Button
                   variant="ghost"
