@@ -33,3 +33,10 @@ export interface JobPosting {
   applicationDate?: Date | null;
 }
 
+export enum Status {
+    APPLIED = "Applied",
+    PHONE_SCREEN = "Phone Screen",
+    INTERVIEW = "Interview",
+    OFFER = "Offer",
+    REJECTED = "Rejected",
+}

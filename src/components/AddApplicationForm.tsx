@@ -23,14 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-const statusOptions = [
-  "Applied",
-  "Phone Screen",
-  "Interview",
-  "Offer",
-  "Rejected",
-];
+import { Status, Application } from "@/services/job-boards";
 
 const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -39,10 +32,10 @@ const formSchema = z.object({
   position: z.string().min(2, {
     message: "Position must be at least 2 characters.",
   }),
-  source: z.string().optional(),
+  source: z.string().optional().default(""),
   applicationDate: z.date().optional(),
   jobDescription: z.string().optional(),
-  status: z.enum(["Applied", "Phone Screen", "Interview", "Offer", "Rejected"]).default("Applied"),
+  status: z.nativeEnum(Status).default(Status.APPLIED),
   roundsCompleted: z.number().min(0).max(100).optional().default(0),
   notes: z.string().optional(),
   hrContact: z.string().optional(),
@@ -67,7 +60,8 @@ const AddApplicationForm: React.FC<AddApplicationFormProps> = ({
     defaultValues: initialValues || {
       companyName: "",
       position: "",
-      status: "Applied",
+      source: "",
+      status: Status.APPLIED,
       roundsCompleted: 0,
     },
   });
@@ -221,7 +215,7 @@ const AddApplicationForm: React.FC<AddApplicationFormProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {statusOptions.map((status) => (
+                  {Object.values(Status).map((status) => (
                     <SelectItem key={status} value={status}>
                       {status}
                     </SelectItem>

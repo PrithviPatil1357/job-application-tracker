@@ -24,19 +24,21 @@ import {
 import AddApplicationForm from "@/components/AddApplicationForm";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Toaster } from "@/components/ui/toaster";
 
-// Define possible status options
-const statusOptions = [
-  "Applied",
-  "Phone Screen",
-  "Interview",
-  "Offer",
-  "Rejected",
-];
+// Extend the JobPosting interface to include new properties
+
+export enum Status {
+    APPLIED = "Applied",
+    PHONE_SCREEN = "Phone Screen",
+    INTERVIEW = "Interview",
+    OFFER = "Offer",
+    REJECTED = "Rejected",
+}
 
 // Extend the JobPosting interface to include new properties
 export interface Application extends JobPosting {
-  status: string;
+  status: Status;
   roundsCompleted: number;
   notes: string;
   jobDescription: string;
@@ -54,7 +56,7 @@ const mockApplications: Application[] = [
     applicationDate: new Date(),
     url: "https://example.com/jobs/123",
     description: "Example job description.",
-    status: "Applied",
+    status: Status.APPLIED,
     roundsCompleted: 1,
     notes: "First round done",
     jobDescription: "Example job description.",
@@ -69,7 +71,7 @@ const mockApplications: Application[] = [
     applicationDate: new Date(),
     url: "https://example.com/jobs/456",
     description: "Another job description.",
-    status: "Interview",
+    status: Status.INTERVIEW,
     roundsCompleted: 2,
     notes: "Second round done",
      jobDescription: "Example job description.",
@@ -81,10 +83,10 @@ const mockApplications: Application[] = [
 const ApplicationList = () => {
   const [applications, setApplications] = useState<Application[]>([]);
   const [open, setOpen] = useState(false);
-  const [selectedApplication, setSelectedApplication] =
-    useState<Application | null>(null);
+  const [selectedApplication, setSelectedApplication]
+    = useState<Application | null>(null);
   const { toast } = useToast();
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<Status | null>(null);
 
   useEffect(() => {
     // Simulate fetching applications from a service or database
@@ -108,6 +110,10 @@ const ApplicationList = () => {
     const newId = String(applications.length + 1);
     const applicationToAdd = { ...newApplication, id: newId };
     setApplications([...applications, applicationToAdd as Application]);
+    toast({
+      title: "Success",
+      description: "Job application added successfully.",
+    });
   };
 
   const handleUpdateApplication = (
@@ -121,6 +127,10 @@ const ApplicationList = () => {
     setApplications(updatedApplications as Application[]);
     setSelectedApplication(null); // Close the dialog after updating
     setOpen(false)
+    toast({
+      title: "Success",
+      description: "Job application updated successfully.",
+    });
   };
 
   const handleDeleteApplication = (id: string) => {
@@ -147,13 +157,13 @@ const ApplicationList = () => {
     <>
       {/* Status Filter */}
       <div className="mb-4 flex justify-end">
-        <Select onValueChange={setStatusFilter} defaultValue={statusFilter || ""}>
+        <Select onValueChange={(value) => setStatusFilter(value as Status)} defaultValue={statusFilter || ""}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="">All Statuses</SelectItem>
-            {statusOptions.map((status) => (
+            {Object.values(Status).map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
               </SelectItem>
@@ -169,10 +179,13 @@ const ApplicationList = () => {
             <TableHead className="w-[100px]">Title</TableHead>
             <TableHead>Company</TableHead>
             <TableHead>Position</TableHead>
+             <TableHead>Source</TableHead>
             <TableHead>Date Applied</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Rounds Completed</TableHead>
             <TableHead>Notes</TableHead>
+             <TableHead>HR Contact</TableHead>
+              <TableHead>Job Description</TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -182,6 +195,7 @@ const ApplicationList = () => {
               <TableCell className="font-medium">{application.title}</TableCell>
               <TableCell>{application.company}</TableCell>
               <TableCell>{application.position}</TableCell>
+              <TableCell>{application.source}</TableCell>
               <TableCell>
                 {application.applicationDate
                   ? format(application.applicationDate, "yyyy-MM-dd")
@@ -190,6 +204,8 @@ const ApplicationList = () => {
               <TableCell>{application.status}</TableCell>
               <TableCell>{application.roundsCompleted}</TableCell>
               <TableCell>{application.notes}</TableCell>
+                <TableCell>{application.hrContact}</TableCell>
+                 <TableCell>{application.jobDescription}</TableCell>
               <TableCell className="flex justify-center gap-4">
                 <Button
                   variant="ghost"
@@ -234,6 +250,7 @@ const ApplicationList = () => {
           />
         </DialogContent>
       </Dialog>
+      <Toaster />
     </>
   );
 };
