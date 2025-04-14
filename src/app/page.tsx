@@ -1,5 +1,7 @@
+
 import ApplicationList from "@/components/ApplicationList";
 import AddApplicationButton from "@/components/AddApplicationButton";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function Home() {
   return (
@@ -8,6 +10,7 @@ export default function Home() {
       <p className="text-muted-foreground mb-4">Track your job applications and stay organized.</p>
       <AddApplicationButton />
       <ApplicationList />
+      <Toaster />
     </div>
   );
 }

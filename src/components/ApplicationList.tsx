@@ -20,7 +20,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import AddApplicationForm from "@/components/AddApplicationForm";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +39,9 @@ export interface Application extends JobPosting {
   status: string;
   roundsCompleted: number;
   notes: string;
+  jobDescription: string;
+  hrContact: string;
+  source: string;
 }
 
 // Dummy data for demonstration
@@ -55,6 +57,9 @@ const mockApplications: Application[] = [
     status: "Applied",
     roundsCompleted: 1,
     notes: "First round done",
+    jobDescription: "Example job description.",
+    hrContact: "HR Contact",
+    source: "LinkedIn",
   },
   {
     id: "2",
@@ -67,6 +72,9 @@ const mockApplications: Application[] = [
     status: "Interview",
     roundsCompleted: 2,
     notes: "Second round done",
+     jobDescription: "Example job description.",
+    hrContact: "HR Contact",
+    source: "LinkedIn",
   },
 ];
 
@@ -108,10 +116,11 @@ const ApplicationList = () => {
   ) => {
     // Simulate updating an application in a service or database
     const updatedApplications = applications.map((app) =>
-      app.id === id ? { ...updatedApplication, id } : app
+      app.id === id ? { ...app, ...updatedApplication } : app
     );
     setApplications(updatedApplications as Application[]);
     setSelectedApplication(null); // Close the dialog after updating
+    setOpen(false)
   };
 
   const handleDeleteApplication = (id: string) => {
@@ -128,6 +137,11 @@ const ApplicationList = () => {
     setSelectedApplication(application);
     setOpen(true);
   };
+
+  const handleDialogClose = () => {
+        setOpen(false);
+        setSelectedApplication(null); // Clear selected application when closing
+    };
 
   return (
     <>
@@ -197,12 +211,7 @@ const ApplicationList = () => {
         </TableBody>
       </Table>
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="primary" className="hidden">
-            Edit Application
-          </Button>
-        </DialogTrigger>
+      <Dialog open={open} onOpenChange={handleDialogClose}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
@@ -221,6 +230,7 @@ const ApplicationList = () => {
                 ? (values) => handleUpdateApplication(selectedApplication.id, values)
                 : (values) => handleAddApplication(values)
             }
+            initialValues={selectedApplication}
           />
         </DialogContent>
       </Dialog>

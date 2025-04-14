@@ -22,6 +22,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const statusOptions = [
+  "Applied",
+  "Phone Screen",
+  "Interview",
+  "Offer",
+  "Rejected",
+];
 
 const formSchema = z.object({
   companyName: z.string().min(2, {
@@ -33,6 +42,8 @@ const formSchema = z.object({
   source: z.string().optional(),
   applicationDate: z.date().optional(),
   jobDescription: z.string().optional(),
+  status: z.enum(["Applied", "Phone Screen", "Interview", "Offer", "Rejected"]).default("Applied"),
+  roundsCompleted: z.number().min(0).max(100).optional().default(0),
   notes: z.string().optional(),
   hrContact: z.string().optional(),
 });
@@ -40,28 +51,33 @@ const formSchema = z.object({
 interface AddApplicationFormProps {
   setOpen: (open: boolean) => void;
   onSubmit: (values: z.infer<typeof formSchema>) => void;
+  initialValues?: z.infer<typeof formSchema>;
 }
 
 const AddApplicationForm: React.FC<AddApplicationFormProps> = ({
   setOpen,
   onSubmit,
+  initialValues,
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       companyName: "",
       position: "",
+      status: "Applied",
+      roundsCompleted: 0,
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
     try {
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      onSubmit(values); // Pass the values to the parent component's onSubmit
+      onSubmit(values);
       toast({
         title: "Success",
         description: "Job application added successfully.",
@@ -113,7 +129,7 @@ const AddApplicationForm: React.FC<AddApplicationFormProps> = ({
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="source"
           render={({ field }) => (
@@ -187,6 +203,53 @@ const AddApplicationForm: React.FC<AddApplicationFormProps> = ({
               </FormControl>
               <FormDescription>
                 Paste the job description for future reference.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Status</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a status" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {statusOptions.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                What is the current status of your application?
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="roundsCompleted"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Rounds Completed</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  {...field}
+                />
+              </FormControl>
+              <FormDescription>
+                How many rounds have you completed?
               </FormDescription>
               <FormMessage />
             </FormItem>

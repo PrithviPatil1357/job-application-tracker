@@ -88,3 +88,10 @@ body {
   }
 }
 
+/* Add this style to prevent overriding toast values */
+.toaster > [role=status] {
+  --toast-background: hsl(var(--card));
+  --toast-foreground: hsl(var(--card-foreground));
+  --toast-border: hsl(var(--border));
+  --toast-radius: 0.5rem;
+}
